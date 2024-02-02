@@ -234,8 +234,8 @@ class YoutubeVideoController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Exception',
-                'data' => $e->getMessage(),
+                'message' => $e->getMessage(),
+                'data' => [],
             ]);
         }
     }
