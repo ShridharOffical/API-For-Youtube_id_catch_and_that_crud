@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ConvertImageController;
+use App\Http\Controllers\CovertImageController;
 use App\Http\Controllers\YoutubeVideoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,3 +32,8 @@ Route::post('delete-youtube-video', [YoutubeVideoController::class, 'deleteRecor
 
 Route::get('user-youtube-video-list', [YoutubeVideoController::class, 'userList'] );
 Route::get('admin-youtube-video-list', [YoutubeVideoController::class, 'adminList']);
+
+
+
+Route::post('convet-image-into-base64',[CovertImageController::class,'convertImageIntoBase64']);
+Route::get('get-converted-base64-into-image',[CovertImageController::class,'showImageFromBase64']);
