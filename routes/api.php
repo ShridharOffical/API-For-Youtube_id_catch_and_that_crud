@@ -24,9 +24,9 @@ Route::get('show-youtube-video', [YoutubeVideoController::class, 'showYoutubeVid
 
 Route::post('store-youtube-video', [YoutubeVideoController::class, 'storeYoutubeVideo'] );
 Route::post('update-youtube-video', [YoutubeVideoController::class, 'updateYoutubeVideo']);
-Route::post('delete-youtube-video', [YoutubeVideoController::class, 'deleterecord']);
+Route::post('delete-youtube-video', [YoutubeVideoController::class, 'deleteRecord']);
 
 
 
-Route::get('user-youtube-video-list', [YoutubeVideoController::class, 'userlist'] );
-Route::get('admin-youtube-video-list', [YoutubeVideoController::class, 'adminlist']);
+Route::get('user-youtube-video-list', [YoutubeVideoController::class, 'userList'] );
+Route::get('admin-youtube-video-list', [YoutubeVideoController::class, 'adminList']);

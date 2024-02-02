@@ -139,59 +139,89 @@ class YoutubeVideoController extends Controller
             ]);
 
             if ($validator->fails()) {
+
                 return response()->json([
                     'status' => false,
                     'message' => 'Validation failed',
                     'data' => $validator->messages(),
                 ]);
             }
-            if ($request->video_id != null || $request->thumbnail != null || $request->is_active != null) {
-                // At least one value is not null, perform the update
-                $data = [];
 
-                if (isset($request->video_id)) {
-                    $videoId = $this->findurlid($request->video_id);
-                    $data['video_id'] = $videoId;
-                }
-                if (isset($request->is_active)) {
+            if ($request->video_id == null && $request->thumbnail == null && $request->is_active == null) {
 
-                    $is_active = $request->is_active;
-                    $data['is_active'] = $is_active;
-                }
-
-
-                if (isset($request->thumbnail)) {
-
-                    
-                    $youtubeVideo = YoutubeVideo::where('id', $request->id)->whereNull('deleted_at')->first();
-
-                    $fullpath = public_path() . '/youtube_videos_thumbnails/' . $youtubeVideo->thumbnail;
-
-                    // delete file
-                    if (file_exists($fullpath)) {
-
-                        unlink($fullpath);
-                    }
-                    $image = $request->file('thumbnail');
-
-                    //rename file 
-                    $filename = 'yt_thumbnail' . '_' . ($videoId ?? $youtubeVideo->video_id) . '_' . random_int(10000, 99999) . '.' . $image->getClientOriginalExtension();
-                    $folder_path = public_path('youtube_videos_thumbnails');
-
-                    if (!is_dir($folder_path)) {
-                        mkdir($folder_path, 0777, true);
-                    }
-                    //Move file to storage
-                    $image->move($folder_path, $filename);
-                    $data['thumbnail'] = $filename;
-                }
-            } else {
                 throw new Exception('Please give at least one value to perform update');
+            }
+
+            // At least one value is not null, perform the update
+            $data = [];
+
+            if (isset($request->video_id)) {
+
+                $videoId = $this->findurlid($request->video_id);
+
+                $data['video_id'] = $videoId;
+            }
+
+            if (isset($request->is_active)) {
+
+                $is_active = $request->is_active;
+
+                $data['is_active'] = $is_active;
+            }
+
+
+            if (isset($request->thumbnail)) {
+
+                $youtubeVideo = YoutubeVideo::where('id', $request->id)->first();
+
+                if (!$youtubeVideo) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Youtube video thumbnail is not found',
+                        'data' => [],
+                    ]);
+                    
+                }
+
+                $fullpath = public_path() . '/youtube_videos_thumbnails/' . $youtubeVideo->thumbnail;
+
+                // delete file
+                if (file_exists($fullpath)) {
+
+                    unlink($fullpath);
+                }
+
+                $image = $request->file('thumbnail');
+
+                //rename file 
+                $filename = 'yt_thumbnail' . '_' . ($videoId ?? $youtubeVideo->video_id) . '_' . random_int(10000, 99999) . '.' . $image->getClientOriginalExtension();
+
+                $folder_path = public_path('youtube_videos_thumbnails');
+
+                if (!is_dir($folder_path)) {
+
+                    mkdir($folder_path, 0777, true);
+                }
+
+                //Move file to storage
+                $image->move($folder_path, $filename);
+
+                $data['thumbnail'] = $filename;
             }
 
             $isUpdated = YoutubeVideo::where('id', $request->id)->update($data);
 
-            if ($isUpdated) {
+            if (!$isUpdated) {
+
+                $responseArray = [
+                    'status' => true,
+                    'message' => 'Record has been updated ',
+                    'data' => []
+                ];
+
+                return response()->json($responseArray);
+            } else {
+
                 $responseArray = [
                     'status' => true,
                     'message' => 'Record has been updated ',
@@ -201,6 +231,7 @@ class YoutubeVideoController extends Controller
                 return response()->json($responseArray);
             }
         } catch (Exception $e) {
+
             return response()->json([
                 'status' => false,
                 'message' => 'Exception',
@@ -241,68 +272,102 @@ class YoutubeVideoController extends Controller
 
 
 
-    public function userlist(){
+    public function userList()
+    {
+        try{
 
-      $userlist =YoutubeVideo::select('video_id','thumbnail')->where('is_active', '=',1 )->get();
+            $userList = YoutubeVideo::select('video_id', 'thumbnail')->where('is_active', '=', 1)->get();
+            
+            if ($userList->isEmpty()) {
 
-    
-     
-      if(isset($userlist)){
-          return response()->json([
-            'status' => true,
-            'message'=> 'Youtube User list',
-            'data'=>[$userlist]
-            ]);
-      }
-      else{
-        return response()->json([
-            'status'=> false,
-            'message'=> 'Data not Found',
-            'data'=>[]
-
-        ]);
-      }
-    }
-    public function adminlist(){
-        $adminlist= YoutubeVideo::all();
-
-        if(isset($adminlist)){
-            return response()->json([
-                'status'=> true,
-                'message'=> 'Data Foun Youtube admin list',
-                'data'=>[$adminlist]
-            ]);
-        }
-        else{
-
-            return response()->json([
-                'status' => false,
-                'message'=> 'data not found',
-                'data'=>[]
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data not Found',
+                    'data' => []
                 ]);
+
+            } else {
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Youtube User list',
+                    'data' => [$userList]
+                ]);
+
+            }
+        }
+        catch (Exception $e) {
+
+            return response()->json([
+                'status'=> false,
+                'message'=> $e->getMessage(),
+                'data'=> []
+            ]);
+
+        }
+    }
+    public function adminList()
+    {
+
+        try{
+            $adminList = YoutubeVideo::all();
+    
+            if ($adminList->isEmpty()) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'data not found',
+                    'data' => []
+                ]);
+                
+            } else {
+                
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data Foun Youtube admin list',
+                    'data' => [$adminList]
+                ]);
+            }
+        }
+        catch (Exception $e) {
+
+            return response()->json([
+                'status'=> false,
+                'message'=> $e->getMessage(),
+                'data'=> []
+            ]);
+
         }
     }
 
-    public function deleterecord(Request $request){
+    public function deleteRecord(Request $request)
+    {
 
-         $delete =YoutubeVideo::where('id', $request->id)->delete();
-         if($delete){
+        try{
+            $delete = YoutubeVideo::where('id', $request->id)->delete();
+            if (!$delete){
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Record is not found ',
+                    'data' => []
+                ]);
+            } 
+            else {
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Youtube Record  has been deleted ',
+                ]);
+            }
+        }
+        catch (Exception $e) {
 
             return response()->json([
-                'status'=> true,
-                'message'=> 'Youtube Record  has been deleted ',
+                'status'=> false,
+                'message'=> $e->getMessage(),
+                'data'=> []
             ]);
-         }
-         else{
-             return response()->json([
-              'status' => false,
-              'message'=> 'Record is not found ',
-              'data'=>[]
-             ]);
-
-         }
+        }
     }
 }
-
-
-
