@@ -260,12 +260,12 @@ class YoutubeVideoController extends Controller
         // Extract the video ID
         $videoId = $queryParams['v'] ?? null;
 
-
+        
         //check the videoid is not empty or length must have 11 characters
-
         throw_if(empty($videoId) || Str::length($videoId) !== 11, new \Exception('YouTube video ID not found or not the correct  given URL. Please check the URL.'));
 
         return $videoId;
+
     }
 
     public function userList()
