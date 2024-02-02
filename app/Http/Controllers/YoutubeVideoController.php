@@ -268,10 +268,6 @@ class YoutubeVideoController extends Controller
         return $videoId;
     }
 
-
-
-
-
     public function userList()
     {
         try{
