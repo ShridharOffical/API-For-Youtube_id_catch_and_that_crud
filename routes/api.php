@@ -37,3 +37,6 @@ Route::get('admin-youtube-video-list', [YoutubeVideoController::class, 'adminLis
 
 Route::post('convet-image-into-base64',[CovertImageController::class,'convertImageIntoBase64']);
 Route::get('get-converted-base64-into-image',[CovertImageController::class,'showImageFromBase64']);
+
+
+Route::post('extract-excel-data-and-insert-to-table', [CovertImageController::class,'excelDataFilterInsert']);

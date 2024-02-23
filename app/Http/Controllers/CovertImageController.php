@@ -8,6 +8,7 @@ use App\Models\CovertImage;
 class CovertImageController extends Controller
 {
     public function convertImageIntoBase64(Request $request){
+        
         // Check if a file is present in the request
         if ($request->hasFile('image')) {
 
@@ -15,7 +16,7 @@ class CovertImageController extends Controller
             $image = $request->file("image");
         
             // Read the contents of the file and encode it to base64
-            $imageData = base64_encode(file_get_contents($image->path()));
+            $imageData = base64_encode(file_get_contents($image));
         
            $query = CovertImage::create([
                 'image_data'=> $imageData
@@ -39,6 +40,7 @@ class CovertImageController extends Controller
         
     
         } else {
+
             return response()->json([
                 'status'=> false,
                 'message'=> 'Please give image ',
